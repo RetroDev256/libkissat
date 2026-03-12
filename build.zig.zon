@@ -1,0 +1,13 @@
+.{
+    .name = .libkissat,
+    .version = "4.0.4",
+    .dependencies = .{
+        .kissat_c = .{
+            .url = "https://github.com/arminbiere/kissat/archive/refs/tags/rel-4.0.4.tar.gz",
+            .hash = "N-V-__8AAExbIwDWZgQ6_hV6Iu09GX6gAz7Lm4TIrBauCllG",
+        },
+    },
+    .minimum_zig_version = "0.16.0-dev.2821+3edaef9e0",
+    .paths = .{ "build.zig", "build.zig.zon", "libkissat.h", ".gitignore" },
+    .fingerprint = 0x7d715c5f3dd734b1,
+}
