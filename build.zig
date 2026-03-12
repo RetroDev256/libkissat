@@ -181,34 +181,81 @@ pub fn build(b: *std.Build) !void {
 
     // ------------------------------------------------------------ Compilation
 
+    const kissat_c = b.dependency("kissat_c", .{});
+    const kissat_src = kissat_c.path("src");
+
     const translate_c = b.addTranslateC(.{
-        .root_source_file = b.path("libkissat.h"),
+        .root_source_file = kissat_src.path(b, "kissat.h"),
         .optimize = optimize,
         .target = target,
     });
 
-    if (asan) translate_c.defineCMacro("ASAN", null);
-    if (lto) translate_c.defineCMacro("LTO", null);
-    if (check_heap) translate_c.defineCMacro("CHECK_HEAP", null);
-    if (check_kitten) translate_c.defineCMacro("CHECK_KITTEN", null);
-    if (check_queue) translate_c.defineCMacro("CHECK_QUEUE", null);
-    if (check_vectors) translate_c.defineCMacro("CHECK_VECTORS", null);
-    if (check_walk) translate_c.defineCMacro("CHECK_WALK", null);
-    if (compact) translate_c.defineCMacro("COMPACT", null);
-    if (embedded.?) translate_c.defineCMacro("EMBEDDED", null);
-    if (!quiet and logging.?) translate_c.defineCMacro("LOGGING", null);
-    if (!check.?) translate_c.defineCMacro("NDEBUG", null);
-    if (metrics.?) translate_c.defineCMacro("METRICS", null);
-    if (no_options) translate_c.defineCMacro("NOPTIONS", null);
-    if (no_proofs) translate_c.defineCMacro("NPROOFS", null);
-    if (quiet) translate_c.defineCMacro("QUIET", null);
-    if (safe) translate_c.defineCMacro("SAFE", null);
-    if (sat) translate_c.defineCMacro("SAT", null);
-    if (statistics.? and !metrics.?) translate_c.defineCMacro("STATISTICS", null);
-    if (unsat) translate_c.defineCMacro("UNSAT", null);
+    const gpa = b.allocator;
+    var flags: std.ArrayList([]const u8) = .empty;
+    defer flags.deinit(gpa);
 
-    const kissat_c = b.dependency("kissat_c", .{});
-    translate_c.addIncludePath(kissat_c.path("src"));
-    _ = translate_c.addModule("libkissat");
-    translate_c.link_libc = true;
+    if (asan) try defineFlag(gpa, translate_c, &flags, "ASAN");
+    if (lto) try defineFlag(gpa, translate_c, &flags, "LTO");
+    if (check_heap) try defineFlag(gpa, translate_c, &flags, "CHECK_HEAP");
+    if (check_kitten) try defineFlag(gpa, translate_c, &flags, "CHECK_KITTEN");
+    if (check_queue) try defineFlag(gpa, translate_c, &flags, "CHECK_QUEUE");
+    if (check_vectors) try defineFlag(gpa, translate_c, &flags, "CHECK_VECTORS");
+    if (check_walk) try defineFlag(gpa, translate_c, &flags, "CHECK_WALK");
+    if (compact) try defineFlag(gpa, translate_c, &flags, "COMPACT");
+    if (embedded.?) try defineFlag(gpa, translate_c, &flags, "EMBEDDED");
+    if (!quiet and logging.?) try defineFlag(gpa, translate_c, &flags, "LOGGING");
+    if (!check.?) try defineFlag(gpa, translate_c, &flags, "NDEBUG");
+    if (metrics.?) try defineFlag(gpa, translate_c, &flags, "METRICS");
+    if (no_options) try defineFlag(gpa, translate_c, &flags, "NOPTIONS");
+    if (no_proofs) try defineFlag(gpa, translate_c, &flags, "NPROOFS");
+    if (quiet) try defineFlag(gpa, translate_c, &flags, "QUIET");
+    if (safe) try defineFlag(gpa, translate_c, &flags, "SAFE");
+    if (sat) try defineFlag(gpa, translate_c, &flags, "SAT");
+    if (statistics.? and !metrics.?) try defineFlag(gpa, translate_c, &flags, "STATISTICS");
+    if (unsat) try defineFlag(gpa, translate_c, &flags, "UNSAT");
+
+    translate_c.addIncludePath(kissat_src);
+    const mod = translate_c.addModule("libkissat");
+    mod.addIncludePath(kissat_src);
+    mod.addCSourceFiles(.{
+        .language = .c,
+        .root = kissat_src,
+        .flags = flags.items,
+        .files = &.{
+            "allocate.c",   "analyze.c",      "ands.c",       "application.c",
+            "arena.c",      "assign.c",       "averages.c",   "backbone.c",
+            "backtrack.c",  "build.c",        "bump.c",       "check.c",
+            "classify.c",   "clause.c",       "collect.c",    "colors.c",
+            "compact.c",    "config.c",       "congruence.c", "decide.c",
+            "deduce.c",     "definition.c",   "dense.c",      "dump.c",
+            "eliminate.c",  "equivalences.c", "error.c",      "extend.c",
+            "factor.c",     "fastel.c",       "file.c",       "flags.c",
+            "format.c",     "forward.c",      "gates.c",      "handle.c",
+            "heap.c",       "ifthenelse.c",   "import.c",     "internal.c",
+            "kimits.c",     "kitten.c",       "krite.c",      "learn.c",
+            "logging.c",    "lucky.c",        "minimize.c",   "mode.c",
+            "options.c",    "parse.c",        "phases.c",     "preprocess.c",
+            "print.c",      "probe.c",        "profile.c",    "promote.c",
+            "proof.c",      "propbeyond.c",   "propdense.c",  "propinitially.c",
+            "proprobe.c",   "propsearch.c",   "queue.c",      "reduce.c",
+            "reluctant.c",  "reorder.c",      "rephase.c",    "report.c",
+            "resize.c",     "resolve.c",      "resources.c",  "restart.c",
+            "search.c",     "shrink.c",       "smooth.c",     "sort.c",
+            "statistics.c", "strengthen.c",   "substitute.c", "sweep.c",
+            "terminate.c",  "tiers.c",        "trail.c",      "transitive.c",
+            "utilities.c",  "vector.c",       "vivify.c",     "walk.c",
+            "warmup.c",     "watch.c",        "weaken.c",
+            "witness.c", //  "main.c"
+        },
+    });
+}
+
+fn defineFlag(
+    gpa: std.mem.Allocator,
+    translate_c: *std.Build.Step.TranslateC,
+    flags: *std.ArrayList([]const u8),
+    comptime flag: []const u8,
+) !void {
+    translate_c.defineCMacro(flag, "1");
+    try flags.append(gpa, "-D" ++ flag);
 }
