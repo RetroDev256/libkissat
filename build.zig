@@ -194,25 +194,32 @@ pub fn build(b: *std.Build) !void {
     var flags: std.ArrayList([]const u8) = .empty;
     defer flags.deinit(gpa);
 
-    if (asan) try defineFlag(gpa, translate_c, &flags, "ASAN");
-    if (lto) try defineFlag(gpa, translate_c, &flags, "LTO");
-    if (check_heap) try defineFlag(gpa, translate_c, &flags, "CHECK_HEAP");
-    if (check_kitten) try defineFlag(gpa, translate_c, &flags, "CHECK_KITTEN");
-    if (check_queue) try defineFlag(gpa, translate_c, &flags, "CHECK_QUEUE");
-    if (check_vectors) try defineFlag(gpa, translate_c, &flags, "CHECK_VECTORS");
-    if (check_walk) try defineFlag(gpa, translate_c, &flags, "CHECK_WALK");
-    if (compact) try defineFlag(gpa, translate_c, &flags, "COMPACT");
-    if (embedded.?) try defineFlag(gpa, translate_c, &flags, "EMBEDDED");
-    if (!quiet and logging.?) try defineFlag(gpa, translate_c, &flags, "LOGGING");
-    if (!check.?) try defineFlag(gpa, translate_c, &flags, "NDEBUG");
-    if (metrics.?) try defineFlag(gpa, translate_c, &flags, "METRICS");
-    if (no_options) try defineFlag(gpa, translate_c, &flags, "NOPTIONS");
-    if (no_proofs) try defineFlag(gpa, translate_c, &flags, "NPROOFS");
-    if (quiet) try defineFlag(gpa, translate_c, &flags, "QUIET");
-    if (safe) try defineFlag(gpa, translate_c, &flags, "SAFE");
-    if (sat) try defineFlag(gpa, translate_c, &flags, "SAT");
-    if (statistics.? and !metrics.?) try defineFlag(gpa, translate_c, &flags, "STATISTICS");
-    if (unsat) try defineFlag(gpa, translate_c, &flags, "UNSAT");
+    inline for (&.{
+        .{ asan, "ASAN" },
+        .{ lto, "LTO" },
+        .{ check_heap, "CHECK_HEAP" },
+        .{ check_kitten, "CHECK_KITTEN" },
+        .{ check_queue, "CHECK_QUEUE" },
+        .{ check_vectors, "CHECK_VECTORS" },
+        .{ check_walk, "CHECK_WALK" },
+        .{ compact, "COMPACT" },
+        .{ embedded.?, "EMBEDDED" },
+        .{ !quiet and logging.?, "LOGGING" },
+        .{ !check.?, "NDEBUG" },
+        .{ metrics.?, "METRICS" },
+        .{ no_options, "NOPTIONS" },
+        .{ no_proofs, "NPROOFS" },
+        .{ quiet, "QUIET" },
+        .{ safe, "SAFE" },
+        .{ sat, "SAT" },
+        .{ statistics.? and !metrics.?, "STATISTICS" },
+        .{ unsat, "UNSAT" },
+    }) |pair| {
+        if (pair[0]) {
+            translate_c.defineCMacro(pair[1], "1");
+            try flags.append(gpa, "-D" ++ pair[1]);
+        }
+    }
 
     translate_c.addIncludePath(kissat_src);
     const mod = translate_c.addModule("libkissat");
@@ -248,14 +255,4 @@ pub fn build(b: *std.Build) !void {
             "witness.c", //  "main.c"
         },
     });
-}
-
-fn defineFlag(
-    gpa: std.mem.Allocator,
-    translate_c: *std.Build.Step.TranslateC,
-    flags: *std.ArrayList([]const u8),
-    comptime flag: []const u8,
-) !void {
-    translate_c.defineCMacro(flag, "1");
-    try flags.append(gpa, "-D" ++ flag);
 }

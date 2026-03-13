@@ -8,6 +8,6 @@
         },
     },
     .minimum_zig_version = "0.16.0-dev.2821+3edaef9e0",
-    .paths = .{ "build.zig", "build.zig.zon", "zig-pkg", ".gitignore" },
+    .paths = .{ "build.zig", "build.zig.zon", ".gitignore" },
     .fingerprint = 0x7d715c5f3dd734b1,
 }
