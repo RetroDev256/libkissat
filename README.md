@@ -1,20 +1,20 @@
-1. Add this dependency to your code:
-    EITHER: `zig fetch --save "git+https://github.com/RetroDev256/libkissat"`
-    OR (example build.zig.zon) -
-    ```zig
-    .{
-        .name = .general,
-        .version = "0.0.0",
-        .dependencies = .{
-            .libkissat = .{
-                .url = "git+https://github.com/RetroDev256/libkissat#17e590bdd9e5b463cf95c4e35983884372de4982",
-                .hash = "libkissat-4.0.4-sTTXPS82AADf9n8wthjGQmI2ci5AuOz_3ThkM1kql53Y",
-            },
+1. Example build.zig.zon
+```zig
+// Run `zig fetch --save git+https://github.com/RetroDev256/libkissat` to add the dependency automatically
+
+.{
+    .name = .general,
+    .version = "0.0.0",
+    .dependencies = .{
+        .libkissat = .{
+            .url = "git+https://github.com/RetroDev256/libkissat#17e590bdd9e5b463cf95c4e35983884372de4982",
+            .hash = "libkissat-4.0.4-sTTXPS82AADf9n8wthjGQmI2ci5AuOz_3ThkM1kql53Y",
         },
-        .fingerprint = 0xce29364abca0a002,
-        .paths = .{ "build.zig", "build.zig.zon", "src" },
-    }
-    ```
+    },
+    .fingerprint = 0xce29364abca0a002,
+    .paths = .{ "build.zig", "build.zig.zon", "src" },
+}
+```
 3. Example build.zig:
 
 ```zig
