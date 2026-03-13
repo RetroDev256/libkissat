@@ -20,14 +20,14 @@ pub fn build(b: *std.Build) !void {
     // limiting the size of formulas that can be handled, fix the default
     // configuration, disable messages, profiling and certain statistics.
     var compact = b.option(bool, "compact", "limit watcher stacks and clause arena size") orelse false;
-    var opt_no_options = b.option(bool, "no-options", "fix all solver options to their default value");
+    var opt_no_options = b.option(bool, "no_options", "fix all solver options to their default value");
     var opt_quiet = b.option(bool, "quiet", "disable messages, built-in profiling and metrics");
-    const competition = b.option(bool, "competition", "same as `no-options` `quiet`");
-    const extreme = b.option(bool, "extreme", "same as `compact` `no-options` `quiet`") orelse false;
-    var no_proofs = b.option(bool, "no-proofs", "do not include code for proof generation") orelse false;
-    const ultimate = b.option(bool, "ultimate", "all configurations above (`extreme` `no-proofs`)") orelse false;
+    const competition = b.option(bool, "competition", "same as `no_options` `quiet`");
+    const extreme = b.option(bool, "extreme", "same as `compact` `no_options` `quiet`") orelse false;
+    var no_proofs = b.option(bool, "no_proofs", "do not include code for proof generation") orelse false;
+    const ultimate = b.option(bool, "ultimate", "all configurations above (`extreme` `no_proofs`)") orelse false;
 
-    // For '--no-options' (and '--extreme', '--ultimate', and '--competition' too)
+    // For '--no_options' (and '--extreme', '--ultimate', and '--competition' too)
     // we allow the following options which enforce a different option at compile
     // time (corresponding to the same run-time settings without '--no-options'):
     const default = b.option(bool, "default", "do not enforce specialized option configurations") orelse false;
@@ -37,7 +37,7 @@ pub fn build(b: *std.Build) !void {
     // Redundant metrics and statistics gathering code can be enabled and disabled
     // separately.  Only essential counters are updated and printed without these.
     // Metrics are considered to be statistics, thus  '--metrics' also implies
-    // '--statistics' and vice versa '--no-statistics' implies '--no-metrics.
+    // '--statistics' and vice versa '--no_statistics' implies '--no_metrics.
     var metrics = b.option(bool, "metrics", "include metrics code (default with `Debug`, `logging`)");
     var statistics = b.option(bool, "statistics", "include statistics code (default without `extreme`)");
 
@@ -45,7 +45,7 @@ pub fn build(b: *std.Build) !void {
     // in DIMACS files.  This feature is enabled for '-c', '-g', and '-l' but
     // disabled for optimized compilation (without '-c', '-g', nor '-l'),
     // except that '--embedded' is also assumed with '--coverage' unless options
-    // are disabled (with '--no-options', '--extreme' or '--no-options').
+    // are disabled (with '--no_options', '--extreme' or '--no_options').
     var embedded = b.option(bool, "embedded", "allow parsing option value pairs in DIMACS file");
 
     // Enable (very) expensive low-level checkers for data structures:
@@ -60,7 +60,7 @@ pub fn build(b: *std.Build) !void {
     // ------------------------------------------ Validating build configuarion
 
     if (competition == true) {
-        if (opt_no_options == false) @panic("`no-options` cannot be specified at the same time as `competition`");
+        if (opt_no_options == false) @panic("`no_options` cannot be specified at the same time as `competition`");
         if (opt_quiet == false) @panic("`quiet` cannot be specified at the same time as `competition`");
 
         opt_no_options = true;
@@ -88,7 +88,7 @@ pub fn build(b: *std.Build) !void {
         if (compact) @panic("cannot combine `compact` and and `extreme`");
         if (embedded == true) @panic("cannot combine `embedded` and `extreme`");
         if (logging == true) @panic("cannot combine `logging` and `extreme`");
-        if (no_options == true) @panic("cannot combine `no-options` and `extreme`");
+        if (no_options == true) @panic("cannot combine `no_options` and `extreme`");
         if (quiet) @panic("cannot combine `quiet` and `extreme`");
         if (ultimate) @panic("cannot combine `ultimate` and `extreme`");
         if (metrics == false) @panic("cannot combine `metrics=false` and `extreme`");
@@ -103,8 +103,8 @@ pub fn build(b: *std.Build) !void {
         if (compact) @panic("cannot combine `compact` and and `ultimate`");
         if (embedded == true) @panic("cannot combine `embedded` and `ultimate`");
         if (logging == true) @panic("cannot combine `logging` and `ultimate`");
-        if (no_options == true) @panic("cannot combine `no-options` and `ultimate`");
-        if (no_proofs == true) @panic("cannot combine `no-proofs` and `ultimate`");
+        if (no_options == true) @panic("cannot combine `no_options` and `ultimate`");
+        if (no_proofs == true) @panic("cannot combine `no_proofs` and `ultimate`");
         if (quiet) @panic("cannot combine `quiet` and `ultimate`");
         if (metrics == false) @panic("cannot combine `metrics=false` and `ultimate`");
         if (statistics == false) @panic("cannot combine `statistics=false` and `ultimate`");
@@ -119,11 +119,11 @@ pub fn build(b: *std.Build) !void {
     if (default and unsat) @panic("cannot combine `default` and `unsat`");
     if (sat and unsat) @panic("cannot combine `sat` and `unsat`");
 
-    if (default and !no_options) @panic("cannot use `default` without `no-options`");
-    if (sat and !no_options) @panic("cannot use `sat` without `no-options`");
-    if (unsat and !no_options) @panic("cannot use `unsat` without `no-options`");
+    if (default and !no_options) @panic("cannot use `default` without `no_options`");
+    if (sat and !no_options) @panic("cannot use `sat` without `no_options`");
+    if (unsat and !no_options) @panic("cannot use `unsat` without `no_options`");
 
-    if (no_options and embedded == true) @panic("cannot combine `no-options` and `embedded`");
+    if (no_options and embedded == true) @panic("cannot combine `no_options` and `embedded`");
 
     // -------------------------------------------- Defaulting on configuration
 
