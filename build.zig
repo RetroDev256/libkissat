@@ -22,10 +22,10 @@ pub fn build(b: *std.Build) !void {
     var compact = b.option(bool, "compact", "limit watcher stacks and clause arena size") orelse false;
     var opt_no_options = b.option(bool, "no-options", "fix all solver options to their default value");
     var opt_quiet = b.option(bool, "quiet", "disable messages, built-in profiling and metrics");
-    const competition = b.option(bool, "competition", "same as '--no-options --quiet'");
-    const extreme = b.option(bool, "extreme", "same as '--compact --no-options --quiet'") orelse false;
+    const competition = b.option(bool, "competition", "same as `no-options` `quiet`");
+    const extreme = b.option(bool, "extreme", "same as `compact` `no-options` `quiet`") orelse false;
     var no_proofs = b.option(bool, "no-proofs", "do not include code for proof generation") orelse false;
-    const ultimate = b.option(bool, "ultimate", "all configurations above ('--extreme --no-proofs')") orelse false;
+    const ultimate = b.option(bool, "ultimate", "all configurations above (`extreme` `no-proofs`)") orelse false;
 
     // For '--no-options' (and '--extreme', '--ultimate', and '--competition' too)
     // we allow the following options which enforce a different option at compile
@@ -38,8 +38,8 @@ pub fn build(b: *std.Build) !void {
     // separately.  Only essential counters are updated and printed without these.
     // Metrics are considered to be statistics, thus  '--metrics' also implies
     // '--statistics' and vice versa '--no-statistics' implies '--no-metrics.
-    var metrics = b.option(bool, "metrics", "include metrics code (default with '-g', '-l')");
-    var statistics = b.option(bool, "statistics", "include statistics code (default without '--extreme')");
+    var metrics = b.option(bool, "metrics", "include metrics code (default with `Debug`, `logging`)");
+    var statistics = b.option(bool, "statistics", "include statistics code (default without `extreme`)");
 
     // For (delta) debugging and testing the parser can read options embedded
     // in DIMACS files.  This feature is enabled for '-c', '-g', and '-l' but
@@ -252,9 +252,8 @@ pub fn build(b: *std.Build) !void {
             "statistics.c", "strengthen.c",   "substitute.c", "sweep.c",
             "terminate.c",  "tiers.c",        "trail.c",      "transitive.c",
             "utilities.c",  "vector.c",       "vivify.c",     "walk.c",
-            "warmup.c",     "watch.c",        "weaken.c",
-            "witness.c", //  "main.c"
-        },
+            "warmup.c",     "watch.c",        "weaken.c",     "witness.c",
+        }, //  "main.c" <-- do not compile the standalone solver, lol
     });
 
     // ---------------------------------------------------- build.h header file
