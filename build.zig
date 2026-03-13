@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const LinkMode = std.builtin.LinkMode;
 
 pub fn build(b: *std.Build) !void {
@@ -255,4 +256,26 @@ pub fn build(b: *std.Build) !void {
             "witness.c", //  "main.c"
         },
     });
+
+    // ---------------------------------------------------- build.h header file
+
+    const manifest = @import("build.zig.zon");
+
+    const build_h_content = std.fmt.comptimePrint(
+        \\#define VERSION "{s}"
+        \\#define COMPILER "Zig {s}"
+        \\#define ID "{s}"
+        \\#define BUILD "{s}"
+        \\
+    , .{
+        manifest.version,
+        builtin.zig_version_string,
+        manifest.dependencies.kissat_c.hash,
+        @tagName(builtin.mode),
+    });
+
+    const write_build_h = b.addTempFiles();
+    const build_h = write_build_h.add("build.h", build_h_content);
+    b.default_step.dependOn(&write_build_h.step);
+    mod.addIncludePath(build_h.dirname());
 }
