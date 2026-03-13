@@ -274,8 +274,7 @@ pub fn build(b: *std.Build) !void {
         @tagName(builtin.mode),
     });
 
-    const write_build_h = b.addTempFiles();
-    const build_h = write_build_h.add("build.h", build_h_content);
-    b.default_step.dependOn(&write_build_h.step);
-    mod.addIncludePath(build_h.dirname());
+    const build_h = b.addWriteFile("build.h", build_h_content);
+    mod.addIncludePath(build_h.getDirectory());
+    b.getInstallStep().dependOn(&build_h.step);
 }
