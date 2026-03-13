@@ -29,7 +29,7 @@ pub fn build(b: *std.Build) !void {
 
     // For '--no_options' (and '--extreme', '--ultimate', and '--competition' too)
     // we allow the following options which enforce a different option at compile
-    // time (corresponding to the same run-time settings without '--no-options'):
+    // time (corresponding to the same run-time settings without '--no_options'):
     const default = b.option(bool, "default", "do not enforce specialized option configurations") orelse false;
     const sat = b.option(bool, "sat", "force options to focus on satisfiable instance") orelse false;
     const unsat = b.option(bool, "unsat", "force options to focus on unsatisfiable instance") orelse false;
