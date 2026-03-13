@@ -1,26 +1,62 @@
-1. `zig fetch --save "git+https://github.com/RetroDev256/libkissat"`
-2. In your build.zig:
+1. Add this dependency to your code:
+    EITHER: `zig fetch --save "git+https://github.com/RetroDev256/libkissat"`
+    OR (example build.zig.zon) -
+    ```zig
+    .{
+        .name = .general,
+        .version = "0.0.0",
+        .dependencies = .{
+            .libkissat = .{
+                .url = "git+https://github.com/RetroDev256/libkissat#17e590bdd9e5b463cf95c4e35983884372de4982",
+                .hash = "libkissat-4.0.4-sTTXPS82AADf9n8wthjGQmI2ci5AuOz_3ThkM1kql53Y",
+            },
+        },
+        .fingerprint = 0xce29364abca0a002,
+        .paths = .{ "build.zig", "build.zig.zon", "src" },
+    }
+    ```
+3. Example build.zig:
 
 ```zig
-const libkissat = b.dependency("libkissat", .{
-    .optimize = optimize,
-    .target = target,
-    .quiet = true,
-});
+const std = @import("std");
 
-... b.createModule(.{
-    .imports = &.{
-        .{
-            .name = "kissat",
-            .module = libkissat.module("libkissat")
-        },
-        // ...
-    },
-    // ...
-}),
+pub fn build(b: *std.Build) void {
+    const optimize = b.standardOptimizeOption(.{});
+    const target = b.standardTargetOptions(.{});
 
+    const libkissat = b.dependency("libkissat", .{
+        .optimize = optimize,
+        .target = target,
+        .quiet = true,
+    });
+
+    const exe = b.addExecutable(.{
+        .name = "general",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .optimize = optimize,
+            .target = target,
+            .imports = &.{
+                .{ .name = "kissat", .module = libkissat.module("libkissat") },
+            },
+        }),
+    });
+
+    b.installArtifact(exe);
+
+    const run_step = b.step("run", "Run the app");
+    const run_cmd = b.addRunArtifact(exe);
+    run_step.dependOn(&run_cmd.step);
+    run_cmd.step.dependOn(b.getInstallStep());
+    if (b.args) |args| run_cmd.addArgs(args);
+
+    const exe_tests = b.addTest(.{ .root_module = exe.root_module });
+    const run_exe_tests = b.addRunArtifact(exe_tests);
+    const test_step = b.step("test", "Run tests");
+    test_step.dependOn(&run_exe_tests.step);
+}
 ```
-3. In your Zig code:
+3. Example `src/main.zig`:
 
 ```zig
 const std = @import("std");
